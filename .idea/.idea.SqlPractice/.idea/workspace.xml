@@ -7,12 +7,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eef335d1-b068-4ba7-b418-71e04a74895e" name="Changes" comment="preparing to work">
-      <change afterPath="$PROJECT_DIR$/SqlPractice/Models/Address.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SqlPractice/Models/Human.cs" afterDir="false" />
+    <list default="true" id="eef335d1-b068-4ba7-b418-71e04a74895e" name="Changes" comment="create structure and data for benchmark">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SqlPractice/SqlPractice.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/SqlPractice.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SqlPractice/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Program.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +22,8 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bd1d5c50194fea68ff3559c160230b0ab50f5acf4ce3061bffd6d62958e2182/ExceptionDispatchInfo.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://D:/Project/SqlPractice/SqlPractice/Benchmarks/InsertingBenchmark.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock://D:/Project/SqlPractice/SqlPractice/DbConnections/AppNpgsqlConnection.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
@@ -85,7 +86,7 @@
       <option name="presentableId" value="Default" />
       <updated>1695457016780</updated>
       <workItem from="1695457019257" duration="3903000" />
-      <workItem from="1695541381650" duration="2645000" />
+      <workItem from="1695541381650" duration="8028000" />
     </task>
     <task id="LOCAL-00001" summary="init project">
       <option name="closed" value="true" />
@@ -103,7 +104,15 @@
       <option name="project" value="LOCAL" />
       <updated>1695541520573</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="create structure and data for benchmark">
+      <option name="closed" value="true" />
+      <created>1695555399907</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1695555399907</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -114,6 +123,78 @@
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="init project" />
     <MESSAGE value="preparing to work" />
-    <option name="LAST_COMMIT_MESSAGE" value="preparing to work" />
+    <MESSAGE value="create structure and data for benchmark" />
+    <option name="LAST_COMMIT_MESSAGE" value="create structure and data for benchmark" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs</url>
+          <line>45</line>
+          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\InsertingBenchmark.cs" initialLine="45" containingFunctionPresentation="Method 'InsertingJustInsertQuery'">
+            <startOffsets>
+              <option value="1903" />
+            </startOffsets>
+            <endOffsets>
+              <option value="2159" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs</url>
+          <line>84</line>
+          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\InsertingBenchmark.cs" initialLine="74" containingFunctionPresentation="Method 'AddressIsExist'">
+            <startOffsets>
+              <option value="2936" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3301" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs</url>
+          <line>101</line>
+          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\InsertingBenchmark.cs" initialLine="91" containingFunctionPresentation="Method 'GetAddressId'">
+            <startOffsets>
+              <option value="3858" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4138" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs</url>
+          <line>119</line>
+          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\InsertingBenchmark.cs" initialLine="109" containingFunctionPresentation="Method 'InsertHuman'">
+            <startOffsets>
+              <option value="4701" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4901" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs</url>
+          <line>132</line>
+          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\InsertingBenchmark.cs" initialLine="122" containingFunctionPresentation="Method 'InsertAddress'">
+            <startOffsets>
+              <option value="5433" />
+            </startOffsets>
+            <endOffsets>
+              <option value="5695" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

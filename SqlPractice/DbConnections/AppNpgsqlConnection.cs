@@ -5,19 +5,19 @@ namespace SqlPractice.DbConnections;
 
 public class AppNpgsqlConnection
 {
-    private readonly IDbConnection _connection;
+    private readonly NpgsqlConnection _connection;
     private readonly string _connectionString;
     public AppNpgsqlConnection(string connectionString)
     {
         _connectionString = connectionString;
         _connection = new NpgsqlConnection(connectionString);
     }
-    public IDbConnection GetConnection()
+    public NpgsqlConnection GetConnection()
     {
         return _connection;
     }
 
-    public IDbConnection CreateConnection()
+    public NpgsqlConnection CreateConnection()
     {
         return new NpgsqlConnection(_connectionString);
     }

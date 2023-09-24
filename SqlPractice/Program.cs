@@ -1,3 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using SqlPractice.Benchmarks;
 
-Console.WriteLine("Hello, World!");
+var benchmark = new InsertingBenchmark();
+
+ await benchmark.InsertingJustInsertQuery();
