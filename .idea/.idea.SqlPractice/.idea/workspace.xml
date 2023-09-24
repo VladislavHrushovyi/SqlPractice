@@ -7,10 +7,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eef335d1-b068-4ba7-b418-71e04a74895e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" afterDir="false" />
+    <list default="true" id="eef335d1-b068-4ba7-b418-71e04a74895e" name="Changes" comment="preparing to work">
+      <change afterPath="$PROJECT_DIR$/SqlPractice/Models/Address.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SqlPractice/Models/Human.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SqlPractice/SqlPractice.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/SqlPractice.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -20,6 +21,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="mock://D:/Project/SqlPractice/SqlPractice/DbConnections/AppNpgsqlConnection.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
@@ -81,6 +85,7 @@
       <option name="presentableId" value="Default" />
       <updated>1695457016780</updated>
       <workItem from="1695457019257" duration="3903000" />
+      <workItem from="1695541381650" duration="2645000" />
     </task>
     <task id="LOCAL-00001" summary="init project">
       <option name="closed" value="true" />
@@ -90,7 +95,15 @@
       <option name="project" value="LOCAL" />
       <updated>1695459861507</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="preparing to work">
+      <option name="closed" value="true" />
+      <created>1695541520573</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1695541520573</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -100,6 +113,7 @@
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="init project" />
-    <option name="LAST_COMMIT_MESSAGE" value="init project" />
+    <MESSAGE value="preparing to work" />
+    <option name="LAST_COMMIT_MESSAGE" value="preparing to work" />
   </component>
 </project>
