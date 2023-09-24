@@ -6,9 +6,10 @@ namespace SqlPractice.DbConnections;
 public class AppNpgsqlConnection
 {
     private readonly IDbConnection _connection;
-
+    private readonly string _connectionString;
     public AppNpgsqlConnection(string connectionString)
     {
+        _connectionString = connectionString;
         _connection = new NpgsqlConnection(connectionString);
     }
     public IDbConnection GetConnection()
@@ -16,18 +17,8 @@ public class AppNpgsqlConnection
         return _connection;
     }
 
-    public async Task InitDatabase()
+    public IDbConnection CreateConnection()
     {
-        
-    }
-
-    public async Task CreateTables()
-    {
-        
-    }
-
-    public async Task InitData()
-    {
-        
+        return new NpgsqlConnection(_connectionString);
     }
 }
