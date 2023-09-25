@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Npgsql;
+﻿using Npgsql;
 
 namespace SqlPractice.DbConnections;
 
