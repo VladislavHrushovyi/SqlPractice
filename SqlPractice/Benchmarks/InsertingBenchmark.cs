@@ -1,5 +1,7 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Data;
+using BenchmarkDotNet.Attributes;
 using Npgsql;
+using NpgsqlTypes;
 using SqlPractice.DbConnections;
 using SqlPractice.Models;
 using SqlPractice.Repositories;
@@ -69,12 +71,57 @@ public class InsertingBenchmark
 
     public async Task InsertingViaTransaction()
     {
-        
+        var tempData = new Human()
+        {
+            Name = "Pitro",
+            Surname = "Sur2",
+            Age = 45,
+            Address = new Address()
+            {
+                CityName = "Kyiv",
+                StreetName = "street2",
+                HouseNumber = 236
+            }
+        };
+        await _connection2.OpenAsync();
+        await using var transaction = await _connection2.BeginTransactionAsync();
+        var isAddressExist = await _dataRepository.AddressIsExist(_connection1, tempData.Address, 2);
+        if (isAddressExist)
+        {
+            var addressId = await _dataRepository.GetAddressId(_connection1, tempData.Address, 2);
+            await _dataRepository.InsertHuman(_connection1, tempData, addressId, 2);
+        }
+        else
+        {
+            var addressId = await _dataRepository.InsertAddress(_connection1, tempData.Address, 2);
+            await _dataRepository.InsertHuman(_connection1, tempData, addressId, 2);
+        }
+
+        await transaction.CommitAsync();
     }
 
     public async Task InsertingViaProcedure()
     {
-        
+        var tempData = new Human()
+        {
+            Name = "Pitro",
+            Surname = "Sur2",
+            Age = 45,
+            Address = new Address()
+            {
+                CityName = "Kyiv",
+                StreetName = "street2",
+                HouseNumber = 236
+            }
+        };
+        await _connection3.OpenAsync();
+        string query =
+            $"select public.add_address1(@{nameof(Address.CityName)},@{nameof(Address.StreetName)},@{nameof(Address.HouseNumber)})";
+        await using var command = new NpgsqlCommand(query, _connection3);
+        command.Parameters.AddWithValue(nameof(Address.CityName),NpgsqlDbType.Text ,tempData.Address.CityName);
+        command.Parameters.AddWithValue(nameof(Address.StreetName),NpgsqlDbType.Text, tempData.Address.StreetName);
+        command.Parameters.AddWithValue(nameof(Address.HouseNumber),NpgsqlDbType.Integer, tempData.Address.HouseNumber);
+        var result = await command.ExecuteNonQueryAsync();
     }
     
 }

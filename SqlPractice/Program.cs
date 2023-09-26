@@ -2,4 +2,4 @@
 
 var benchmark = new InsertingBenchmark();
 
- await benchmark.InsertingJustInsertQuery();
+ await benchmark.InsertingViaProcedure();
