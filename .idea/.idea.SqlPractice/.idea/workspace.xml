@@ -11,6 +11,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SqlPractice/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SqlPractice/SqlPractice.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/SqlPractice.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,9 +24,18 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bd1d5c50194fea68ff3559c160230b0ab50f5acf4ce3061bffd6d62958e2182/ExceptionDispatchInfo.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://D:/Project/SqlPractice/SqlPractice/DbConnections/AppNpgsqlConnection.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SqlPractice/Models/Address.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SqlPractice/Models/Human.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SqlPractice/Program.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SqlPractice/Utils/StaticData.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="Toolset" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -55,7 +66,11 @@
     ]
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected=".NET Project.SqlPractice">
+    <configuration name="Publish SqlPractice to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
+      <riderPublish configuration="Release" platform="Any CPU" runtime="win-x64" target_folder="$PROJECT_DIR$/SqlPractice/bin/Release/net7.0/win-x64/publish" target_framework="net7.0" uuid_high="2559317472247693968" uuid_low="-6644618021087981187" />
+      <method v="2" />
+    </configuration>
     <configuration name="SqlPractice" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -86,7 +101,13 @@
       <workItem from="1695457019257" duration="3903000" />
       <workItem from="1695541381650" duration="8996000" />
       <workItem from="1695630188510" duration="3286000" />
-      <workItem from="1695720143486" duration="4163000" />
+      <workItem from="1695720143486" duration="4827000" />
+      <workItem from="1695801690163" duration="4223000" />
+      <workItem from="1695816401557" duration="222000" />
+      <workItem from="1695816639171" duration="355000" />
+      <workItem from="1695817038827" duration="39000" />
+      <workItem from="1695817191737" duration="35000" />
+      <workItem from="1695817566272" duration="193000" />
     </task>
     <task id="LOCAL-00001" summary="init project">
       <option name="closed" value="true" />
@@ -128,7 +149,15 @@
       <option name="project" value="LOCAL" />
       <updated>1695631179802</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="start to implement procedure insert">
+      <option name="closed" value="true" />
+      <created>1695742701506</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1695742701506</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -142,23 +171,37 @@
     <MESSAGE value="create structure and data for benchmark" />
     <MESSAGE value="implement stupid query inserting" />
     <MESSAGE value="refactoring extract code to classes" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactoring extract code to classes" />
+    <MESSAGE value="start to implement procedure insert" />
+    <option name="LAST_COMMIT_MESSAGE" value="start to implement procedure insert" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs</url>
-          <line>102</line>
-          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\InsertingBenchmark.cs" initialLine="76" containingFunctionPresentation="Method 'InsertingViaProcedure'">
+          <url>file://$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs</url>
+          <line>86</line>
+          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Repositories\DataRepository.cs" initialLine="86" containingFunctionPresentation="Method 'InsertHumanFunction'">
             <startOffsets>
-              <option value="3698" />
+              <option value="4312" />
             </startOffsets>
             <endOffsets>
-              <option value="3998" />
+              <option value="4551" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="11" />
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs</url>
+          <line>73</line>
+          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Repositories\DataRepository.cs" initialLine="73" containingFunctionPresentation="Method 'InsertIfNotExistAddress'">
+            <startOffsets>
+              <option value="3568" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3711" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

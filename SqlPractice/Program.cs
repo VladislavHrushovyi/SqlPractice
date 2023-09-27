@@ -1,5 +1,6 @@
-﻿using SqlPractice.Benchmarks;
+﻿using BenchmarkDotNet.Running;
+using SqlPractice.Benchmarks;
 
-var benchmark = new InsertingBenchmark();
 
- await benchmark.InsertingViaProcedure();
+var summary = BenchmarkRunner.Run(typeof(InsertingBenchmark));
+Console.ReadKey();

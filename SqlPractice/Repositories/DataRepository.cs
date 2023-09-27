@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using NpgsqlTypes;
 using SqlPractice.Models;
 
 namespace SqlPractice.Repositories;
@@ -66,5 +67,34 @@ public class DataRepository
         var result = await command.ExecuteScalarAsync();
 
         return (int)result;
+    }
+
+    public async Task<int> InsertIfNotExistAddress(NpgsqlConnection connection, Address address)
+    {
+        string query =
+            $"select add_address3_Id(@{nameof(Address.CityName)},@{nameof(Address.StreetName)},@{nameof(Address.HouseNumber)})";
+        await using var command = new NpgsqlCommand(query, connection);
+        command.Parameters.AddWithValue(nameof(Address.CityName),NpgsqlDbType.Text ,address.CityName);
+        command.Parameters.AddWithValue(nameof(Address.StreetName),NpgsqlDbType.Text, address.StreetName);
+        command.Parameters.AddWithValue(nameof(Address.HouseNumber),NpgsqlDbType.Integer, address.HouseNumber);
+        var result = await command.ExecuteScalarAsync();
+
+        return (int)result;
+    }
+
+    public async Task InsertHumanFunction(NpgsqlConnection connection, Human human, int addressId)
+    {
+        string query = $"select public.add_human3(" +
+                       $"@{nameof(Human.Name)}," +
+                       $"@{nameof(Human.Surname)}," +
+                       $"@{nameof(Human.Age)}," +
+                       $"@addressId)";
+        await using var command = new NpgsqlCommand(query, connection);
+        command.Parameters.AddWithValue(nameof(Human.Name), NpgsqlDbType.Text, human.Name);
+        command.Parameters.AddWithValue(nameof(Human.Surname), NpgsqlDbType.Text, human.Surname);
+        command.Parameters.AddWithValue(nameof(Human.Age), NpgsqlDbType.Integer, human.Age);
+        command.Parameters.AddWithValue("addressId", NpgsqlDbType.Integer, addressId);
+
+        await command.ExecuteScalarAsync();
     }
 }
