@@ -6,4 +6,4 @@ Case 1
 - Transaction
 - Postgres function
 
-![report_image](../SqlPractice/SqlPractice/Images/1_report.png)
+![report_image](./SqlPractice/Images/1_report.png)
