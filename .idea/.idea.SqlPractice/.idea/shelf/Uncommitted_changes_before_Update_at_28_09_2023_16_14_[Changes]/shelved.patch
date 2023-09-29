@@ -1,0 +1,303 @@
+Index: SqlPractice/Benchmarks/InsertingBenchmark.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using BenchmarkDotNet.Attributes;\r\nusing Npgsql;\r\nusing SqlPractice.DbConnections;\r\nusing SqlPractice.Models;\r\nusing SqlPractice.Repositories;\r\nusing SqlPractice.Utils;\r\n\r\nnamespace SqlPractice.Benchmarks;\r\n\r\npublic class InsertingBenchmark\r\n{\r\n    private const string ConnectionString = \"Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=TestDb\";\r\n    private readonly DataRepository _dataRepository = new();\r\n    private readonly NpgsqlConnection _connection1;\r\n    private readonly NpgsqlConnection _connection2;\r\n    private readonly NpgsqlConnection _connection3;\r\n\r\n    private readonly List<Human> _humans;\r\n    public InsertingBenchmark()\r\n    {\r\n        var appNpgsqlConnection = new AppNpgsqlConnection(ConnectionString);\r\n        _connection1 = appNpgsqlConnection.CreateConnection();\r\n        _connection2 = appNpgsqlConnection.CreateConnection();\r\n        _connection3 = appNpgsqlConnection.CreateConnection();\r\n        _humans = Enumerable.Range(1, 300).Select(_ => new Human()\r\n        {\r\n            Name = StaticData._names[Random.Shared.Next(0, StaticData._names.Count - 1)],\r\n            Surname = StaticData._surnames[Random.Shared.Next(0, StaticData._surnames.Count - 1)],\r\n            Age = Random.Shared.Next(10,75),\r\n            Address = new Address()\r\n            {\r\n                CityName = StaticData._cities[Random.Shared.Next(0, StaticData._cities.Count - 1)],\r\n                HouseNumber = Random.Shared.Next(1, 999),\r\n                StreetName = StaticData._streets[Random.Shared.Next(0, StaticData._streets.Count - 1)]\r\n            }\r\n        }).ToList();\r\n    }\r\n\r\n    [Benchmark(Baseline = true)]\r\n    public async Task InsertingJustInsertQuery()\r\n    {\r\n        _connection1.Open();\r\n\r\n        foreach (var human in _humans)\r\n        {\r\n            var isAddressExist = await _dataRepository.AddressIsExist(_connection1, human.Address, 1);\r\n            if (isAddressExist)\r\n            {\r\n                var addressId = await _dataRepository.GetAddressId(_connection1, human.Address, 1);\r\n                await _dataRepository.InsertHuman(_connection1, human, addressId, 1);\r\n            }\r\n            else\r\n            {\r\n                var addressId = await _dataRepository.InsertAddress(_connection1, human.Address, 1);\r\n                await _dataRepository.InsertHuman(_connection1, human, addressId, 1);\r\n            }\r\n        }\r\n\r\n        await _connection1.CloseAsync();\r\n    }\r\n\r\n    [Benchmark]\r\n    public async Task InsertingViaTransaction()\r\n    {\r\n        await _connection2.OpenAsync();\r\n        await using var transaction = await _connection2.BeginTransactionAsync();\r\n        try\r\n        {\r\n            foreach (var human in _humans)\r\n            {\r\n                var isAddressExist = await _dataRepository.AddressIsExist(_connection2, human.Address, 2);\r\n                if (isAddressExist)\r\n                {\r\n                    var addressId = await _dataRepository.GetAddressId(_connection2, human.Address, 2);\r\n                    await _dataRepository.InsertHuman(_connection2, human, addressId, 2);\r\n                }\r\n                else\r\n                {\r\n                    var addressId = await _dataRepository.InsertAddress(_connection2, human.Address, 2);\r\n                    await _dataRepository.InsertHuman(_connection2, human, addressId, 2);\r\n                }\r\n            }\r\n            \r\n            await transaction.CommitAsync();\r\n            await _connection2.CloseAsync();\r\n        }\r\n        catch(Exception ex)\r\n        {\r\n            await transaction.RollbackAsync();\r\n            await _connection2.CloseAsync();\r\n            Console.WriteLine(ex.Message);\r\n        }\r\n    }\r\n\r\n    [Benchmark]\r\n    public async Task InsertingViaProcedure()\r\n    {\r\n        await _connection3.OpenAsync();\r\n\r\n        foreach (var human in _humans)\r\n        {\r\n            var addressId = await _dataRepository.InsertIfNotExistAddress(_connection3, human.Address);\r\n            await _dataRepository.InsertHumanFunction(_connection3, human, addressId);\r\n        }\r\n\r\n        await _connection3.CloseAsync();\r\n    }\r\n    \r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/SqlPractice/Benchmarks/InsertingBenchmark.cs b/SqlPractice/Benchmarks/InsertingBenchmark.cs
+--- a/SqlPractice/Benchmarks/InsertingBenchmark.cs	(revision 914ab32a320d81203932b8240abf3913c0addc61)
++++ b/SqlPractice/Benchmarks/InsertingBenchmark.cs	(date 1695906390042)
+@@ -1,3 +1,4 @@
++using System.Text;
+ using BenchmarkDotNet.Attributes;
+ using Npgsql;
+ using SqlPractice.DbConnections;
+@@ -7,26 +8,34 @@
+ 
+ namespace SqlPractice.Benchmarks;
+ 
++[MemoryDiagnoser]
+ public class InsertingBenchmark
+ {
+-    private const string ConnectionString = "Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=TestDb";
++    private const string ConnectionString =
++        "Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=TestDb";
++
+     private readonly DataRepository _dataRepository = new();
+     private readonly NpgsqlConnection _connection1;
+     private readonly NpgsqlConnection _connection2;
+     private readonly NpgsqlConnection _connection3;
++    private readonly NpgsqlConnection _connection4;
++    private readonly NpgsqlConnection _connection5;
+ 
+     private readonly List<Human> _humans;
++
+     public InsertingBenchmark()
+     {
+         var appNpgsqlConnection = new AppNpgsqlConnection(ConnectionString);
+         _connection1 = appNpgsqlConnection.CreateConnection();
+         _connection2 = appNpgsqlConnection.CreateConnection();
+         _connection3 = appNpgsqlConnection.CreateConnection();
++        _connection4 = appNpgsqlConnection.CreateConnection();
++        _connection5 = appNpgsqlConnection.CreateConnection();
+         _humans = Enumerable.Range(1, 300).Select(_ => new Human()
+         {
+             Name = StaticData._names[Random.Shared.Next(0, StaticData._names.Count - 1)],
+             Surname = StaticData._surnames[Random.Shared.Next(0, StaticData._surnames.Count - 1)],
+-            Age = Random.Shared.Next(10,75),
++            Age = Random.Shared.Next(10, 75),
+             Address = new Address()
+             {
+                 CityName = StaticData._cities[Random.Shared.Next(0, StaticData._cities.Count - 1)],
+@@ -80,11 +89,11 @@
+                     await _dataRepository.InsertHuman(_connection2, human, addressId, 2);
+                 }
+             }
+-            
++
+             await transaction.CommitAsync();
+             await _connection2.CloseAsync();
+         }
+-        catch(Exception ex)
++        catch (Exception ex)
+         {
+             await transaction.RollbackAsync();
+             await _connection2.CloseAsync();
+@@ -105,5 +114,75 @@
+ 
+         await _connection3.CloseAsync();
+     }
+-    
++
++    [Benchmark]
++    public async Task InsertingViaBigInsertQueryString()
++    {
++                /*
++                 WITH new_address AS (
++                    SELECT id
++                    FROM address4
++                 WHERE
++                city_name = 'test'
++                AND street_name = 'test'
++                AND house_number = 44
++        ), inserted_address AS (
++                    INSERT INTO address4(city_name, street_name, house_number)
++                    SELECT 'test', 'test', 44
++                    WHERE NOT EXISTS (SELECT 1 FROM new_address)
++                    RETURNING id
++                )
++                    INSERT INTO people4(name, surname, age, address_id)
++                    SELECT 'name2', 'surname2', 66, COALESCE((SELECT id FROM inserted_address), (SELECT id FROM new_address limit 1));	
++                 */
++        await _connection4.OpenAsync();
++        var queryBuilder = new StringBuilder();
++        foreach (var human in _humans)
++        {
++            queryBuilder.Append("with new_address as (select id from address4 where ");
++            queryBuilder.AppendFormat("city_name = '{0}' ", human.Address.CityName);
++            queryBuilder.AppendFormat("and street_name = '{0}' ", human.Address.StreetName);
++            queryBuilder.AppendFormat("and house_number = {0} ", human.Address.HouseNumber);
++            queryBuilder.Append("), inserted_address as (insert into address4(city_name, street_name, house_number) ");
++            queryBuilder.AppendFormat("select '{0}', '{1}', {2} ", human.Address.CityName, human.Address.StreetName, human.Address.HouseNumber);
++            queryBuilder.Append("where not exists (select 1 from new_address) returning id) ");
++            queryBuilder.Append("insert into people4(name, surname, age, address_id) ");
++            queryBuilder.AppendFormat("select '{0}', '{1}', {2}, coalesce(", human.Name, human.Surname, human.Age);
++            queryBuilder.Append("(select id from inserted_address), ");
++            queryBuilder.Append("(select id from new_address limit 1)); ");
++        }
++
++        await using var command = new NpgsqlCommand(queryBuilder.ToString(), _connection4);
++        var result = await command.ExecuteScalarAsync();
++
++        await _connection4.CloseAsync();
++    }
++
++    [Benchmark]
++    public async Task InsertingViaBigCallingFunctionString()
++    {
++        /*
++         * with new_address as (
++            select add_address5_id('wqdqwdq', 'wdwedwe', 44) as address_id
++            ) select public.add_human5('1111', '1111', 22, new_address.address_id)
++            from new_address
++         */
++        await _connection5.OpenAsync();
++        var queryBuilder = new StringBuilder();
++
++        foreach (var human in _humans)
++        {
++            queryBuilder.Append("with new_address as ( ");
++            queryBuilder.AppendFormat("select add_address5_id('{0}', '{1}', {2}) as address_id ) ", 
++                human.Address.CityName, human.Address.StreetName, human.Address.HouseNumber);
++            queryBuilder.AppendFormat("select add_human5('{0}', '{1}', {2}, new_address.address_id) ",
++                human.Name, human.Surname, human.Age);
++            queryBuilder.Append("from new_address;");
++        }
++
++        await using var command = new NpgsqlCommand(queryBuilder.ToString(), _connection5);
++        var result = await command.ExecuteScalarAsync();
++
++        await _connection5.CloseAsync();
++    }
+ }
+\ No newline at end of file
+Index: SqlPractice/Program.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using BenchmarkDotNet.Running;\r\nusing SqlPractice.Benchmarks;\r\n\r\n\r\nvar summary = BenchmarkRunner.Run(typeof(InsertingBenchmark));\r\nConsole.ReadKey();
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/SqlPractice/Program.cs b/SqlPractice/Program.cs
+--- a/SqlPractice/Program.cs	(revision 914ab32a320d81203932b8240abf3913c0addc61)
++++ b/SqlPractice/Program.cs	(date 1695905675526)
+@@ -3,4 +3,6 @@
+ 
+ 
+ var summary = BenchmarkRunner.Run(typeof(InsertingBenchmark));
++// var benchmark = new InsertingBenchmark();
++// await benchmark.InsertingViaBigInsertQueryString();
+ Console.ReadKey();
+\ No newline at end of file
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># SqlPractice\r\nComparing what is method work faster\r\n\r\nCase 1\r\n- Simple insert query\r\n- Transaction\r\n- Postgres function\r\n\r\n![report_image](./SqlPractice/Images/1_report.png)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision 914ab32a320d81203932b8240abf3913c0addc61)
++++ b/README.md	(date 1695906897226)
+@@ -6,4 +6,11 @@
+ - Transaction
+ - Postgres function
+ 
++![report_image](./SqlPractice/Images/1_report.png)
++
++Case 2
++- Simple insert query
++- Transaction
++- Postgres function
++
+ ![report_image](./SqlPractice/Images/1_report.png)
+\ No newline at end of file
+Index: .idea/.idea.SqlPractice/.idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoGeneratedRunConfigurationManager\">\r\n    <projectFile>SqlPractice/SqlPractice.csproj</projectFile>\r\n  </component>\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"eef335d1-b068-4ba7-b418-71e04a74895e\" name=\"Changes\" comment=\"edit README.md\">\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/shelf/Uncommitted_changes_before_Update_at_27_09_2023_15_47_[Changes]/shelved.patch\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/shelf/Uncommitted_changes_before_Update_at_27_09_2023_15_47__Changes_.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/README.md\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/README.md\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"HighlightingSettingsPerFile\">\r\n    <setting file=\"file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bd1d5c50194fea68ff3559c160230b0ab50f5acf4ce3061bffd6d62958e2182/ExceptionDispatchInfo.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs\" root0=\"FORCE_HIGHLIGHTING\" />\r\n    <setting file=\"file://$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs\" root0=\"FORCE_HIGHLIGHTING\" />\r\n    <setting file=\"file://$PROJECT_DIR$/SqlPractice/Models/Address.cs\" root0=\"FORCE_HIGHLIGHTING\" />\r\n    <setting file=\"file://$PROJECT_DIR$/SqlPractice/Models/Human.cs\" root0=\"FORCE_HIGHLIGHTING\" />\r\n    <setting file=\"file://$PROJECT_DIR$/SqlPractice/Program.cs\" root0=\"FORCE_HIGHLIGHTING\" />\r\n    <setting file=\"file://$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs\" root0=\"FORCE_HIGHLIGHTING\" />\r\n    <setting file=\"mock://D:/Project/SqlPractice/SqlPractice/Repositories/DataRepository.cs\" root0=\"SKIP_HIGHLIGHTING\" />\r\n    <setting file=\"file://$PROJECT_DIR$/SqlPractice/Utils/StaticData.cs\" root0=\"FORCE_HIGHLIGHTING\" />\r\n  </component>\r\n  <component name=\"MetaFilesCheckinStateConfiguration\" checkMetaFiles=\"true\" />\r\n  <component name=\"ProblemsViewState\">\r\n    <option name=\"selectedTabId\" value=\"Toolset\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 4\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2Vn1QkmMQtzKxq8FXwayI9Cz6ev\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;master&quot;,\r\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\r\n    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;\r\n  },\r\n  &quot;keyToStringList&quot;: {\r\n    &quot;rider.external.source.directories&quot;: [\r\n      &quot;C:\\\\Users\\\\vladg\\\\AppData\\\\Roaming\\\\JetBrains\\\\Rider2023.2\\\\resharper-host\\\\DecompilerCache&quot;,\r\n      &quot;C:\\\\Users\\\\vladg\\\\AppData\\\\Roaming\\\\JetBrains\\\\Rider2023.2\\\\resharper-host\\\\SourcesCache&quot;,\r\n      &quot;C:\\\\Users\\\\vladg\\\\AppData\\\\Local\\\\Symbols\\\\src&quot;\r\n    ]\r\n  }\r\n}</component>\r\n  <component name=\"RunManager\" selected=\".NET Project.SqlPractice\">\r\n    <configuration name=\"Publish SqlPractice to folder\" type=\"DotNetFolderPublish\" factoryName=\"Publish to folder\">\r\n      <riderPublish configuration=\"Release\" platform=\"Any CPU\" runtime=\"win-x64\" target_folder=\"$PROJECT_DIR$/SqlPractice/bin/Release/net7.0/win-x64/publish\" target_framework=\"net7.0\" uuid_high=\"2559317472247693968\" uuid_low=\"-6644618021087981187\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"SqlPractice\" type=\"DotNetProject\" factoryName=\".NET Project\">\r\n      <option name=\"EXE_PATH\" value=\"\" />\r\n      <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"\" />\r\n      <option name=\"PASS_PARENT_ENVS\" value=\"1\" />\r\n      <option name=\"USE_EXTERNAL_CONSOLE\" value=\"0\" />\r\n      <option name=\"USE_MONO\" value=\"0\" />\r\n      <option name=\"RUNTIME_ARGUMENTS\" value=\"\" />\r\n      <option name=\"PROJECT_PATH\" value=\"$PROJECT_DIR$/SqlPractice/SqlPractice.csproj\" />\r\n      <option name=\"PROJECT_EXE_PATH_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_ARGUMENTS_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_WORKING_DIRECTORY_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_KIND\" value=\"DotNetCore\" />\r\n      <option name=\"PROJECT_TFM\" value=\"\" />\r\n      <method v=\"2\">\r\n        <option name=\"Build\" />\r\n      </method>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"eef335d1-b068-4ba7-b418-71e04a74895e\" name=\"Changes\" comment=\"\" />\r\n      <created>1695457016780</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1695457016780</updated>\r\n      <workItem from=\"1695457019257\" duration=\"3903000\" />\r\n      <workItem from=\"1695541381650\" duration=\"8996000\" />\r\n      <workItem from=\"1695630188510\" duration=\"3286000\" />\r\n      <workItem from=\"1695720143486\" duration=\"4827000\" />\r\n      <workItem from=\"1695801690163\" duration=\"4223000\" />\r\n      <workItem from=\"1695816401557\" duration=\"222000\" />\r\n      <workItem from=\"1695816639171\" duration=\"355000\" />\r\n      <workItem from=\"1695817038827\" duration=\"39000\" />\r\n      <workItem from=\"1695817191737\" duration=\"35000\" />\r\n      <workItem from=\"1695817566272\" duration=\"193000\" />\r\n      <workItem from=\"1695818423802\" duration=\"78000\" />\r\n      <workItem from=\"1695818535578\" duration=\"17000\" />\r\n      <workItem from=\"1695818759755\" duration=\"310000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"init project\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1695459861507</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1695459861507</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"preparing to work\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1695541520573</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1695541520573</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"create structure and data for benchmark\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1695555399907</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1695555399907</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"implement stupid query inserting\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1695562936698</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1695562936698</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"refactoring extract code to classes\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1695631179802</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1695631179802</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"start to implement procedure insert\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1695742701506</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1695742701506</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00007\" summary=\"first start benchmark and results\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1695818456401</created>\r\n      <option name=\"number\" value=\"00007\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1695818456401</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00008\" summary=\"edit README.md\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1695819068049</created>\r\n      <option name=\"number\" value=\"00008\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1695819068049</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"9\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"UnityCheckinConfiguration\" checkUnsavedScenes=\"true\" />\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <option name=\"CLEAR_INITIAL_COMMIT_MESSAGE\" value=\"true\" />\r\n    <MESSAGE value=\"init project\" />\r\n    <MESSAGE value=\"preparing to work\" />\r\n    <MESSAGE value=\"create structure and data for benchmark\" />\r\n    <MESSAGE value=\"implement stupid query inserting\" />\r\n    <MESSAGE value=\"refactoring extract code to classes\" />\r\n    <MESSAGE value=\"start to implement procedure insert\" />\r\n    <MESSAGE value=\"first start benchmark and results\" />\r\n    <MESSAGE value=\"edit README.md\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"edit README.md\" />\r\n  </component>\r\n  <component name=\"XDebuggerManager\">\r\n    <breakpoint-manager>\r\n      <breakpoints>\r\n        <line-breakpoint enabled=\"true\" type=\"DotNet Breakpoints\">\r\n          <url>file://$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs</url>\r\n          <line>86</line>\r\n          <properties documentPath=\"D:\\Project\\SqlPractice\\SqlPractice\\Repositories\\DataRepository.cs\" initialLine=\"86\" containingFunctionPresentation=\"Method 'InsertHumanFunction'\">\r\n            <startOffsets>\r\n              <option value=\"4312\" />\r\n            </startOffsets>\r\n            <endOffsets>\r\n              <option value=\"4551\" />\r\n            </endOffsets>\r\n          </properties>\r\n          <option name=\"timeStamp\" value=\"13\" />\r\n        </line-breakpoint>\r\n        <line-breakpoint enabled=\"true\" type=\"DotNet Breakpoints\">\r\n          <url>file://$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs</url>\r\n          <line>73</line>\r\n          <properties documentPath=\"D:\\Project\\SqlPractice\\SqlPractice\\Repositories\\DataRepository.cs\" initialLine=\"73\" containingFunctionPresentation=\"Method 'InsertIfNotExistAddress'\">\r\n            <startOffsets>\r\n              <option value=\"3568\" />\r\n            </startOffsets>\r\n            <endOffsets>\r\n              <option value=\"3711\" />\r\n            </endOffsets>\r\n          </properties>\r\n          <option name=\"timeStamp\" value=\"14\" />\r\n        </line-breakpoint>\r\n      </breakpoints>\r\n    </breakpoint-manager>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.idea.SqlPractice/.idea/workspace.xml b/.idea/.idea.SqlPractice/.idea/workspace.xml
+--- a/.idea/.idea.SqlPractice/.idea/workspace.xml	(revision 914ab32a320d81203932b8240abf3913c0addc61)
++++ b/.idea/.idea.SqlPractice/.idea/workspace.xml	(date 1695906797249)
+@@ -7,11 +7,11 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="eef335d1-b068-4ba7-b418-71e04a74895e" name="Changes" comment="edit README.md">
+-      <change afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/shelf/Uncommitted_changes_before_Update_at_27_09_2023_15_47_[Changes]/shelved.patch" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/shelf/Uncommitted_changes_before_Update_at_27_09_2023_15_47__Changes_.xml" afterDir="false" />
++    <list default="true" id="eef335d1-b068-4ba7-b418-71e04a74895e" name="Changes" comment="">
++      <change beforePath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/shelf/Uncommitted_changes_before_Update_at_27_09_2023_15_47__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/shelf/Uncommitted_changes_before_Update_at_27_09_2023_15_47__Changes_.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/SqlPractice/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Program.cs" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -22,15 +22,17 @@
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+   </component>
+   <component name="HighlightingSettingsPerFile">
+-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bd1d5c50194fea68ff3559c160230b0ab50f5acf4ce3061bffd6d62958e2182/ExceptionDispatchInfo.cs" root0="SKIP_HIGHLIGHTING" />
++    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bd1d5c50194fea68ff3559c160230b0ab50f5acf4ce3061bffd6d62958e2182/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
+     <setting file="file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" root0="FORCE_HIGHLIGHTING" />
+     <setting file="file://$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" root0="FORCE_HIGHLIGHTING" />
+     <setting file="file://$PROJECT_DIR$/SqlPractice/Models/Address.cs" root0="FORCE_HIGHLIGHTING" />
+     <setting file="file://$PROJECT_DIR$/SqlPractice/Models/Human.cs" root0="FORCE_HIGHLIGHTING" />
+     <setting file="file://$PROJECT_DIR$/SqlPractice/Program.cs" root0="FORCE_HIGHLIGHTING" />
+     <setting file="file://$PROJECT_DIR$/SqlPractice/Repositories/DataRepository.cs" root0="FORCE_HIGHLIGHTING" />
+-    <setting file="mock://D:/Project/SqlPractice/SqlPractice/Repositories/DataRepository.cs" root0="SKIP_HIGHLIGHTING" />
+     <setting file="file://$PROJECT_DIR$/SqlPractice/Utils/StaticData.cs" root0="FORCE_HIGHLIGHTING" />
++  </component>
++  <component name="MarkdownSettingsMigration">
++    <option name="stateVersion" value="1" />
+   </component>
+   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+   <component name="ProblemsViewState">
+@@ -110,7 +112,10 @@
+       <workItem from="1695817566272" duration="193000" />
+       <workItem from="1695818423802" duration="78000" />
+       <workItem from="1695818535578" duration="17000" />
+-      <workItem from="1695818759755" duration="310000" />
++      <workItem from="1695818759755" duration="521000" />
++      <workItem from="1695886815845" duration="8645000" />
++      <workItem from="1695905887316" duration="235000" />
++      <workItem from="1695906364078" duration="113000" />
+     </task>
+     <task id="LOCAL-00001" summary="init project">
+       <option name="closed" value="true" />
+@@ -176,7 +181,15 @@
+       <option name="project" value="LOCAL" />
+       <updated>1695819068049</updated>
+     </task>
+-    <option name="localTasksCounter" value="9" />
++    <task id="LOCAL-00009" summary="correct path to image">
++      <option name="closed" value="true" />
++      <created>1695819199413</created>
++      <option name="number" value="00009" />
++      <option name="presentableId" value="LOCAL-00009" />
++      <option name="project" value="LOCAL" />
++      <updated>1695819199413</updated>
++    </task>
++    <option name="localTasksCounter" value="10" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -193,7 +206,8 @@
+     <MESSAGE value="start to implement procedure insert" />
+     <MESSAGE value="first start benchmark and results" />
+     <MESSAGE value="edit README.md" />
+-    <option name="LAST_COMMIT_MESSAGE" value="edit README.md" />
++    <MESSAGE value="correct path to image" />
++    <option name="LAST_COMMIT_MESSAGE" value="correct path to image" />
+   </component>
+   <component name="XDebuggerManager">
+     <breakpoint-manager>
+@@ -223,6 +237,32 @@
+             </endOffsets>
+           </properties>
+           <option name="timeStamp" value="14" />
++        </line-breakpoint>
++        <line-breakpoint enabled="true" type="DotNet Breakpoints">
++          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs</url>
++          <line>183</line>
++          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\InsertingBenchmark.cs" initialLine="182" containingFunctionPresentation="Method 'InsertingViaBigCallingFunctionString'">
++            <startOffsets>
++              <option value="7581" />
++            </startOffsets>
++            <endOffsets>
++              <option value="7629" />
++            </endOffsets>
++          </properties>
++          <option name="timeStamp" value="18" />
++        </line-breakpoint>
++        <line-breakpoint enabled="true" type="DotNet Breakpoints">
++          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs</url>
++          <line>154</line>
++          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\InsertingBenchmark.cs" initialLine="153" containingFunctionPresentation="Method 'InsertingViaBigInsertQueryString'">
++            <startOffsets>
++              <option value="6350" />
++            </startOffsets>
++            <endOffsets>
++              <option value="6433" />
++            </endOffsets>
++          </properties>
++          <option name="timeStamp" value="19" />
+         </line-breakpoint>
+       </breakpoints>
+     </breakpoint-manager>
