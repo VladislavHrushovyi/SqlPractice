@@ -15,88 +15,69 @@ public class InsertingBenchmark
         "Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=TestDb";
 
     private readonly DataRepository _dataRepository = new();
-    private readonly NpgsqlConnection _connection1;
-    private readonly NpgsqlConnection _connection2;
-    private readonly NpgsqlConnection _connection3;
-    private readonly NpgsqlConnection _connection4;
-    private readonly NpgsqlConnection _connection5;
+    private readonly NpgsqlConnection _connection;
 
-    private readonly List<Human> _humans;
+    private readonly IEnumerable<Human> _humans;
 
     public InsertingBenchmark()
     {
         var appNpgsqlConnection = new AppNpgsqlConnection(ConnectionString);
-        _connection1 = appNpgsqlConnection.CreateConnection();
-        _connection2 = appNpgsqlConnection.CreateConnection();
-        _connection3 = appNpgsqlConnection.CreateConnection();
-        _connection4 = appNpgsqlConnection.CreateConnection();
-        _connection5 = appNpgsqlConnection.CreateConnection();
-        _humans = Enumerable.Range(1, 300).Select(_ => new Human()
-        {
-            Name = StaticData._names[Random.Shared.Next(0, StaticData._names.Count - 1)],
-            Surname = StaticData._surnames[Random.Shared.Next(0, StaticData._surnames.Count - 1)],
-            Age = Random.Shared.Next(10, 75),
-            Address = new Address()
-            {
-                CityName = StaticData._cities[Random.Shared.Next(0, StaticData._cities.Count - 1)],
-                HouseNumber = Random.Shared.Next(1, 999),
-                StreetName = StaticData._streets[Random.Shared.Next(0, StaticData._streets.Count - 1)]
-            }
-        }).ToList();
+        _connection = appNpgsqlConnection.CreateConnection();
+        _humans = StaticData.FormData();
     }
 
     [Benchmark(Baseline = true)]
     public async Task InsertingJustInsertQuery()
     {
-        _connection1.Open();
+        await _connection.OpenAsync();
 
         foreach (var human in _humans)
         {
-            var isAddressExist = await _dataRepository.AddressIsExist(_connection1, human.Address, 1);
+            var isAddressExist = await _dataRepository.AddressIsExist(_connection, human.Address, 1);
             if (isAddressExist)
             {
-                var addressId = await _dataRepository.GetAddressId(_connection1, human.Address, 1);
-                await _dataRepository.InsertHuman(_connection1, human, addressId, 1);
+                var addressId = await _dataRepository.GetAddressId(_connection, human.Address, 1);
+                await _dataRepository.InsertHuman(_connection, human, addressId, 1);
             }
             else
             {
-                var addressId = await _dataRepository.InsertAddress(_connection1, human.Address, 1);
-                await _dataRepository.InsertHuman(_connection1, human, addressId, 1);
+                var addressId = await _dataRepository.InsertAddress(_connection, human.Address, 1);
+                await _dataRepository.InsertHuman(_connection, human, addressId, 1);
             }
         }
 
-        await _connection1.CloseAsync();
+        await _connection.CloseAsync();
     }
 
     [Benchmark]
     public async Task InsertingViaTransaction()
     {
-        await _connection2.OpenAsync();
-        await using var transaction = await _connection2.BeginTransactionAsync();
+        await _connection.OpenAsync();
+        await using var transaction = await _connection.BeginTransactionAsync();
         try
         {
             foreach (var human in _humans)
             {
-                var isAddressExist = await _dataRepository.AddressIsExist(_connection2, human.Address, 2);
+                var isAddressExist = await _dataRepository.AddressIsExist(_connection, human.Address, 2);
                 if (isAddressExist)
                 {
-                    var addressId = await _dataRepository.GetAddressId(_connection2, human.Address, 2);
-                    await _dataRepository.InsertHuman(_connection2, human, addressId, 2);
+                    var addressId = await _dataRepository.GetAddressId(_connection, human.Address, 2);
+                    await _dataRepository.InsertHuman(_connection, human, addressId, 2);
                 }
                 else
                 {
-                    var addressId = await _dataRepository.InsertAddress(_connection2, human.Address, 2);
-                    await _dataRepository.InsertHuman(_connection2, human, addressId, 2);
+                    var addressId = await _dataRepository.InsertAddress(_connection, human.Address, 2);
+                    await _dataRepository.InsertHuman(_connection, human, addressId, 2);
                 }
             }
 
             await transaction.CommitAsync();
-            await _connection2.CloseAsync();
+            await _connection.CloseAsync();
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            await _connection2.CloseAsync();
+            await _connection.CloseAsync();
             Console.WriteLine(ex.Message);
         }
     }
@@ -104,15 +85,15 @@ public class InsertingBenchmark
     [Benchmark]
     public async Task InsertingViaProcedure()
     {
-        await _connection3.OpenAsync();
+        await _connection.OpenAsync();
 
         foreach (var human in _humans)
         {
-            var addressId = await _dataRepository.InsertIfNotExistAddress(_connection3, human.Address);
-            await _dataRepository.InsertHumanFunction(_connection3, human, addressId);
+            var addressId = await _dataRepository.InsertIfNotExistAddress(_connection, human.Address);
+            await _dataRepository.InsertHumanFunction(_connection, human, addressId);
         }
 
-        await _connection3.CloseAsync();
+        await _connection.CloseAsync();
     }
 
     [Benchmark]
@@ -135,7 +116,7 @@ public class InsertingBenchmark
                     INSERT INTO people4(name, surname, age, address_id)
                     SELECT 'name2', 'surname2', 66, COALESCE((SELECT id FROM inserted_address), (SELECT id FROM new_address limit 1));	
                  */
-        await _connection4.OpenAsync();
+        await _connection.OpenAsync();
         var queryBuilder = new StringBuilder();
         foreach (var human in _humans)
         {
@@ -152,10 +133,10 @@ public class InsertingBenchmark
             queryBuilder.Append("(select id from new_address limit 1)); ");
         }
 
-        await using var command = new NpgsqlCommand(queryBuilder.ToString(), _connection4);
+        await using var command = new NpgsqlCommand(queryBuilder.ToString(), _connection);
         var result = await command.ExecuteScalarAsync();
 
-        await _connection4.CloseAsync();
+        await _connection.CloseAsync();
     }
 
     [Benchmark]
@@ -167,7 +148,7 @@ public class InsertingBenchmark
             ) select public.add_human5('1111', '1111', 22, new_address.address_id)
             from new_address
          */
-        await _connection5.OpenAsync();
+        await _connection.OpenAsync();
         var queryBuilder = new StringBuilder();
 
         foreach (var human in _humans)
@@ -180,9 +161,9 @@ public class InsertingBenchmark
             queryBuilder.Append("from new_address;");
         }
 
-        await using var command = new NpgsqlCommand(queryBuilder.ToString(), _connection5);
+        await using var command = new NpgsqlCommand(queryBuilder.ToString(), _connection);
         var result = await command.ExecuteScalarAsync();
 
-        await _connection5.CloseAsync();
+        await _connection.CloseAsync();
     }
 }
