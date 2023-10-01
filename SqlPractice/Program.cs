@@ -6,6 +6,9 @@ var appContext = new AppNpgsqlConnection("Host=localhost;Port=5432;Username=post
 appContext.DeleteAllTable();
 appContext.InitTables();
 //var summary = BenchmarkRunner.Run(typeof(InsertingBenchmark));
+var summary = BenchmarkRunner.Run(typeof(SearchingBenchmark));
 // var benchmark = new InsertingBenchmark();
 // await benchmark.InsertingViaBigInsertQueryString();
+// var benchmark = new SearchingBenchmark();
+// await benchmark.SearchByIndexCreation();
 Console.ReadKey();

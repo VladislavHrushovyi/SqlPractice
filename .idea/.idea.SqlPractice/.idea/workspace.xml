@@ -8,12 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eef335d1-b068-4ba7-b418-71e04a74895e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/shelf/Uncommitted_changes_before_Update_at_28_09_2023_16_14__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/shelf/Uncommitted_changes_before_Update_at_28_09_2023_16_14__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SqlPractice/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SqlPractice/Benchmarks/SearchingBenchmark.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Benchmarks/SearchingBenchmark.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SqlPractice/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SqlPractice/Utils/StaticData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SqlPractice/Utils/StaticData.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +24,7 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/bd1d5c50194fea68ff3559c160230b0ab50f5acf4ce3061bffd6d62958e2182/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SqlPractice/Benchmarks/InsertingBenchmark.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock://D:/Project/SqlPractice/SqlPractice/Benchmarks/InsertingBenchmark.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://D:/Project/SqlPractice/SqlPractice/DbConnections/AppNpgsqlConnection.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SqlPractice/DbConnections/AppNpgsqlConnection.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SqlPractice/Models/Address.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SqlPractice/Models/Human.cs" root0="FORCE_HIGHLIGHTING" />
@@ -121,7 +119,9 @@
       <workItem from="1695906364078" duration="113000" />
       <workItem from="1695906769343" duration="944000" />
       <workItem from="1695991619987" duration="339000" />
-      <workItem from="1696065239033" duration="1888000" />
+      <workItem from="1696065239033" duration="3988000" />
+      <workItem from="1696147125254" duration="135000" />
+      <workItem from="1696147502237" duration="2997000" />
     </task>
     <task id="LOCAL-00001" summary="init project">
       <option name="closed" value="true" />
@@ -219,13 +219,32 @@
       <option name="project" value="LOCAL" />
       <updated>1695991955858</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="add remove/create tables">
+      <option name="closed" value="true" />
+      <created>1696067464403</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1696067464403</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="init project" />
@@ -240,7 +259,8 @@
     <MESSAGE value="add string query" />
     <MESSAGE value="a dont know what is it" />
     <MESSAGE value="create new class for benchmarking" />
-    <option name="LAST_COMMIT_MESSAGE" value="create new class for benchmarking" />
+    <MESSAGE value="add remove/create tables" />
+    <option name="LAST_COMMIT_MESSAGE" value="add remove/create tables" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -270,6 +290,19 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/SqlPractice/Benchmarks/SearchingBenchmark.cs</url>
+          <line>40</line>
+          <properties documentPath="D:\Project\SqlPractice\SqlPractice\Benchmarks\SearchingBenchmark.cs" initialLine="34" containingFunctionPresentation="Method 'SearchByIndexCreation'">
+            <startOffsets>
+              <option value="1274" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1304" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

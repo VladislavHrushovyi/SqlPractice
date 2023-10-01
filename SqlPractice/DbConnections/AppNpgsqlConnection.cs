@@ -1,12 +1,13 @@
 ﻿using System.Text;
 using Npgsql;
+using SqlPractice.Utils;
 
 namespace SqlPractice.DbConnections;
 
 public class AppNpgsqlConnection
 {
     private readonly NpgsqlConnection _connection;
-    private const int AmountTables = 5;
+    private const int AmountTables = 7;
     private readonly string _connectionString;
     public AppNpgsqlConnection(string connectionString)
     {
@@ -52,6 +53,48 @@ public class AppNpgsqlConnection
 
         using var command = new NpgsqlCommand(queryBuilder.ToString(), _connection);
         command.ExecuteScalar();
+        _connection.Close();
+    }
+
+    public void CreateNameSurnameIndex()
+    {
+        string query = "create index if not exists full_name on people7(name,surname);";
+        _connection.Open();
+        using var command = new NpgsqlCommand(query, _connection);
+        command.ExecuteScalar();
+        
+        _connection.Close();
+    }
+
+    public void InitDataInTable(int numberOfTable)
+    {
+        _connection.Open();
+        var data = StaticData.FormData().ToArray();
+        var queryBuilder = new StringBuilder();
+
+        for (int i = 0; i < 100; i++)
+        {
+            foreach (var human in data)
+            {
+                queryBuilder.Append("with new_address as ( ");
+                queryBuilder.Append(
+                    $"select add_address{numberOfTable}_id(" +
+                    $"'{human.Address.CityName}', " +
+                    $"'{human.Address.StreetName}', " +
+                    $"{human.Address.HouseNumber}) as address_id ) ");
+                queryBuilder.Append(
+                    $"select add_human{numberOfTable}(" +
+                    $"'{human.Name}', " +
+                    $"'{human.Surname}', " +
+                    $"{human.Age}, " +
+                    $"new_address.address_id) ");
+                queryBuilder.Append("from new_address;");
+            }   
+        }
+
+        using var command = new NpgsqlCommand(queryBuilder.ToString(), _connection);
+        var result = command.ExecuteScalar();
+
         _connection.Close();
     }
 
