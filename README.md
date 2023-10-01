@@ -13,3 +13,9 @@ Case 2 (added big query string)
 - Just a big query with calling inserting function on postgres
 
 ![report_image](./SqlPractice/Images/2_report.png)
+
+Case 3 (about 30_000 rows)
+- selecting by default
+- selecting by index (name + surname)
+
+![report_image](./SqlPractice/Images/3_report.png)
